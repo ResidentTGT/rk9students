@@ -21,6 +21,10 @@ add_subdirectory(common)
 set(IDE_FOLDER "Apps")
 add_subdirectory(sample_app)
 
+# Apps
+set(IDE_FOLDER "Apps")
+add_subdirectory(lattice)
+
 
 # Apps
 set(IDE_FOLDER "Apps")

@@ -117,6 +117,11 @@ namespace rk9
 		Triangle t{ p1, p2, p3 };
 		Triangles.push_back(t);
 	}
+
+	void PolyModel::AddTriangle(Triangle t)
+	{
+		Triangles.emplace_back(t);
+	}
 	
 	//return the number of triangles in polymodel
 	unsigned PolyModel::GetTrianglesCount() {
@@ -126,10 +131,21 @@ namespace rk9
 	// Возвращает массив вершин треугольника под индексом index
 	// Если треугольника с таким индексом нет, возвращает пустой массив
 	Triangle PolyModel::GetTriangleVertices(unsigned index) {
-		
 		if (index <= GetTrianglesCount()) 
 			return Triangles[index];
-		
+	}
+
+	PolyModel* PolyModel::MergeModels(PolyModel & m1, PolyModel & m2)
+	{
+		PolyModel* result = new PolyModel();
+
+		for (size_t i = 0; i < m1.GetTrianglesCount(); ++i)
+			result->AddTriangle(m1.GetTriangleVertices(i));
+
+		for (size_t i = 0; i < m2.GetTrianglesCount(); ++i)
+			result->AddTriangle(m2.GetTriangleVertices(i));
+
+		return result;
 	}
 
 }

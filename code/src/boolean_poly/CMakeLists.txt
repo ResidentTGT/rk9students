@@ -21,7 +21,7 @@ message(STATUS "App: ${target}")
 # Sources
 # 
 set(headers
-    ${include_path}/Result.h
+    Result.h
 )
 set(sources
     main.cpp

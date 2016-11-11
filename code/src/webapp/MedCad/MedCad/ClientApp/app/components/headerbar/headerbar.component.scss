@@ -1,0 +1,32 @@
+.headerbar{
+    height:30px;
+    min-height:30px;
+    margin-bottom:0;
+
+    .navbar-brand{
+        padding:5px 15px;
+        height:30px;
+    }
+
+    .navbar-nav li a{
+        padding-bottom:5px;
+        padding-top:5px;
+    }
+
+    .navbar-right{
+        margin-right:5px;
+    }
+
+    .user-controll{
+        padding-top:3px;
+        margin-right:10px;
+    }
+
+    #open-file-dlg{
+        display: none;
+    }
+
+    .dropdown-menu{
+        cursor:pointer;
+    }
+}

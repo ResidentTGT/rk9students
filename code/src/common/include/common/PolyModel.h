@@ -20,9 +20,13 @@ namespace rk9
 		int WriteToSTLFile(char * filename);
 
 		void AddTriangle(Point p1, Point p2, Point p3);
+		void AddTriangle(Triangle t);
 		unsigned GetTrianglesCount();
 
 		Triangle GetTriangleVertices(unsigned index);
-		
+
+		std::vector<Point>Points;
+
+		static PolyModel* MergeModels(PolyModel& m1, PolyModel& m2);
 	};
 }

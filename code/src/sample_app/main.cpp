@@ -3,10 +3,10 @@
 
 using namespace rk9;
 
-int main(int /*argc*/, char* /*argv*/[])
+int main(int argc, char* argv[])
 {
 	
-	PolyModel in_model;
+	PolyModel model_a, model_b;
 
 	// A simple usage example:
 	// Read a model from file,
@@ -14,11 +14,13 @@ int main(int /*argc*/, char* /*argv*/[])
 	// then write the model 
 	// to another file.
 
-	in_model.ReadFromSTLFile("input.stl");
+	model_a.ReadFromSTLFile(argv[1]);
 
-	in_model.AddTriangle(Point{ 0.0, 0.0, 0.0 }, Point{ 0.0, 1.0, 0.0 }, Point{ 0.0, 0.0, 1.0 });
+	model_b.ReadFromSTLFile(argv[1]);
 
-	in_model.WriteToSTLFile("output.stl");
+	PolyModel* res = PolyModel::MergeModels(model_a, model_b);
+
+	res->WriteToSTLFile("output.stl");
 
 	return 0;
 }

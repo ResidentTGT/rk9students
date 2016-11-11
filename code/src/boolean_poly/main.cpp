@@ -18,8 +18,8 @@ void IntersectTriangles(Triangle tr1, Triangle tr2, vector<Result>& intersection
 void IntersectEdgeTriangle(Point, Point, Triangle tr1, Triangle tr2, vector<Result>& intersection_points, int i, int j);
 bool IsPlaneBetweenTriangle(Triangle tr1, Triangle tr2);
 void DeleteSamePoints(vector<Point>& intersection_points);
-void Sort(vector<Result>&intersection_points);
-void CreatePolygons(vector<Result>&intersection_points, PolyModel model_a, PolyModel model_b, vector<Polygon> &polygons_a, vector<Polygon> &polygons_b);
+void DeleteSameIntersections(vector<Result>&intersection_points);
+void UniteIntersectPointsWithTriangles(vector<Result>&intersection_points, PolyModel model_a, PolyModel model_b, vector<Polygon> &polygons_a, vector<Polygon> &polygons_b);
 void DeleteSamePolygons(vector<Polygon> &polygons);
 
 int main(int argc, char ** argv) {
@@ -30,10 +30,10 @@ int main(int argc, char ** argv) {
 	model_b.ReadFromSTLFile(argv[2]);
 
 	vector<Result> intersection_points = GetIntersectionPoints(model_a, model_b);
-	Sort(intersection_points);
+	DeleteSameIntersections(intersection_points);
 	vector<Polygon> polygons_a; //polygons of model_a
 	vector<Polygon> polygons_b; //polygons of model_b
-	CreatePolygons(intersection_points, model_a, model_b, polygons_a, polygons_b);
+	UniteIntersectPointsWithTriangles(intersection_points, model_a, model_b, polygons_a, polygons_b);
 	DeleteSamePolygons(polygons_a);
 	DeleteSamePolygons(polygons_b);
 
@@ -142,7 +142,7 @@ void DeleteSamePoints(vector<Point>& points)
 		}
 	}
 }
-void Sort(vector<Result>&intersection_points)
+void DeleteSameIntersections(vector<Result>&intersection_points)
 {
 	for (int i = 0; i < intersection_points.size(); i++)
 	{
@@ -157,7 +157,7 @@ void Sort(vector<Result>&intersection_points)
 		}
 	}
 }
-void CreatePolygons(vector<Result>&intersection_points, PolyModel model_a, PolyModel model_b, vector<Polygon> &polygons_a, vector<Polygon> &polygons_b)
+void UniteIntersectPointsWithTriangles(vector<Result>&intersection_points, PolyModel model_a, PolyModel model_b, vector<Polygon> &polygons_a, vector<Polygon> &polygons_b)
 {
 
 	for (int i = 0; i < intersection_points.size(); i++)
