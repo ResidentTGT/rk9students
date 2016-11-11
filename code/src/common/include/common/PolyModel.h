@@ -23,6 +23,6 @@ namespace rk9
 		unsigned GetTrianglesCount();
 
 		Triangle GetTriangleVertices(unsigned index);
-		std::vector<Point>Points;
+		
 	};
 }

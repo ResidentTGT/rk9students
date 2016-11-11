@@ -11,33 +11,33 @@ using namespace rk9;
 // Поиск пересечения двух многогранников 
 // model_a, model_b - исходные модели 
 // Возвращает координаты точек, образующих контур пересечения 
+
 vector<Result> GetIntersectionPoints(PolyModel model_a, PolyModel model_b);
 bool IsTheSamePoints(Point p1, Point p2);
-void IntersectTriangles(Triangle tr1, Triangle tr2, vector<Result>& intersection_points,int i,int j);
-void IntersectEdgeTriangle(Point, Point, Triangle tr1,Triangle tr2, vector<Result>& intersection_points,int i,int j);
+void IntersectTriangles(Triangle tr1, Triangle tr2, vector<Result>& intersection_points, int i, int j);
+void IntersectEdgeTriangle(Point, Point, Triangle tr1, Triangle tr2, vector<Result>& intersection_points, int i, int j);
 bool IsPlaneBetweenTriangle(Triangle tr1, Triangle tr2);
 void DeleteSamePoints(vector<Point>& intersection_points);
 void Sort(vector<Result>&intersection_points);
 void CreatePolygons(vector<Result>&intersection_points, PolyModel model_a, PolyModel model_b, vector<Polygon> &polygons_a, vector<Polygon> &polygons_b);
 void DeleteSamePolygons(vector<Polygon> &polygons);
-const double EPSILON = 1E-10;
-int oo = 0;
+
 int main(int argc, char ** argv) {
 
 	PolyModel model_a, model_b;
 
-	model_a.ReadFromSTLFile(argv[1]); 
-	model_b.ReadFromSTLFile(argv[2]); 
-	
+	model_a.ReadFromSTLFile(argv[1]);
+	model_b.ReadFromSTLFile(argv[2]);
+
 	vector<Result> intersection_points = GetIntersectionPoints(model_a, model_b);
 	Sort(intersection_points);
 	vector<Polygon> polygons_a; //polygons of model_a
 	vector<Polygon> polygons_b; //polygons of model_b
-	CreatePolygons(intersection_points,model_a,model_b, polygons_a, polygons_b);
+	CreatePolygons(intersection_points, model_a, model_b, polygons_a, polygons_b);
 	DeleteSamePolygons(polygons_a);
 	DeleteSamePolygons(polygons_b);
 
-	
+
 
 	//Из-за того, что модель состоит из треугольников, а в результате пересечения 
 	//мы получаем массив с количеством точек, не обязательно кратным 3, приходится 
@@ -46,7 +46,7 @@ int main(int argc, char ** argv) {
 	//PolyModel modelz;
 	//for (int i = 0; i < intersection_points.size() - 2; i += 3)
 	//	modelz.AddTriangle(intersection_points[i], intersection_points[i + 1], intersection_points[i+2] );
-	
+
 	//modelz.WriteToSTLFile(argv[3]);
 
 	return 0;
@@ -64,34 +64,32 @@ vector<Result> GetIntersectionPoints(PolyModel model_a, PolyModel model_b) {
 		for (unsigned j = 0; j < triangles_count_B; j++) {
 			Triangle tr2 = model_b.GetTriangleVertices(j);
 
-			if (IsPlaneBetweenTriangle(tr1, tr2) ==false) {		
-				oo++;
-				IntersectTriangles(tr1, tr2, results,i,j);//points of intersection of 2 triangles 
-			}
+			if (IsPlaneBetweenTriangle(tr1, tr2) == false)
+				IntersectTriangles(tr1, tr2, results, i, j);//points of intersection of 2 triangles 			
 		}
 	}
 	return results;
 }
 
 //finding the intersection between the edge of one triangle and plane of another
-void IntersectTriangles(Triangle tr1, Triangle tr2, vector<Result> &results,int i,int j) {
-	IntersectEdgeTriangle(tr1.A, tr1.B, tr2,tr1, results, i, j); 
-	IntersectEdgeTriangle(tr1.A, tr1.C, tr2,tr1, results, i, j);  
-	IntersectEdgeTriangle(tr1.B, tr1.C, tr2,tr1, results, i, j);
-												
-	IntersectEdgeTriangle(tr2.A, tr2.B, tr1,tr2, results, i, j);
-	IntersectEdgeTriangle(tr2.A, tr2.C, tr1,tr2, results, i, j);
-	IntersectEdgeTriangle(tr2.B, tr2.C, tr1,tr2, results, i, j);
+void IntersectTriangles(Triangle tr1, Triangle tr2, vector<Result> &results, int i, int j) {
+	IntersectEdgeTriangle(tr1.A, tr1.B, tr2, tr1, results, i, j);
+	IntersectEdgeTriangle(tr1.A, tr1.C, tr2, tr1, results, i, j);
+	IntersectEdgeTriangle(tr1.B, tr1.C, tr2, tr1, results, i, j);
+
+	IntersectEdgeTriangle(tr2.A, tr2.B, tr1, tr2, results, i, j);
+	IntersectEdgeTriangle(tr2.A, tr2.C, tr1, tr2, results, i, j);
+	IntersectEdgeTriangle(tr2.B, tr2.C, tr1, tr2, results, i, j);
 }
 
 
-void IntersectEdgeTriangle(Point point1, Point point2, Triangle tr1,Triangle tr2, vector<Result> &results,int i,int j) {
+void IntersectEdgeTriangle(Point point1, Point point2, Triangle tr1, Triangle tr2, vector<Result> &results, int i, int j) {
 	Plane plane = tr1.GetPlane();
 	Point intersect_point;
 	if (plane.GetIntersectionWithLine(point1, point2, intersect_point))
 	{
-		if ((tr1.IsPointInsideTriangle(intersect_point) ==true)&&// check if finded point lies in triangles
-			(tr2.IsPointInsideTriangle(intersect_point) == true))  
+		if ((tr1.IsPointInsideTriangle(intersect_point) == true) &&// check if finded point lies in triangles
+			(tr2.IsPointInsideTriangle(intersect_point) == true))
 		{
 			Result res;
 			res.points.push_back(intersect_point);
@@ -106,36 +104,16 @@ void IntersectEdgeTriangle(Point point1, Point point2, Triangle tr1,Triangle tr2
 bool IsPlaneBetweenTriangle(Triangle tr1, Triangle tr2) {
 	Vector3 v1(tr1.A, tr1.B);
 	Vector3 v2(tr1.A, tr1.C);
-	Vector3 norm= norm.CrossProduct(v1, v2);
+	Vector3 norm = norm.CrossProduct(v1, v2);
 
 	double d2 = -norm.A*tr1.A.X - norm.B*tr1.A.Y - norm.C*tr1.A.Z;
-
 	double dv1 = norm.A*tr2.A.X + norm.B*tr2.A.Y + norm.C*tr2.A.Z + d2;
 	double dv2 = norm.A*tr2.B.X + norm.B*tr2.B.Y + norm.C*tr2.B.Z + d2;
 	double dv3 = norm.A*tr2.C.X + norm.B*tr2.C.Y + norm.C*tr2.C.Z + d2;
-	if((dv1>=0&&dv2>0&&dv3>0)|| (dv1<0 && dv2<0 && dv3<0))
-
-	/*if (((tr1.A.X <tr2.A.X) &&( tr1.A.Y < tr2.A.Y) &&( tr1.A.Z<tr2.A.Z)&& 
-		 (tr1.A.X <tr2.B.X) &&( tr1.A.Y < tr2.B.Y) &&( tr1.A.Z<tr2.B.Z)&& 
-		 (tr1.A.X <tr2.C.X) &&( tr1.A.Y < tr2.C.Y) &&( tr1.A.Z<tr2.C.Z)&& 
-		 (tr1.B.X <tr2.A.X) &&( tr1.B.Y < tr2.A.Y) &&( tr1.B.Z<tr2.A.Z)&& 
-		 (tr1.B.X <tr2.B.X) &&( tr1.B.Y < tr2.B.Y) &&( tr1.B.Z<tr2.B.Z)&& 
-		 (tr1.B.X <tr2.C.X) &&( tr1.B.Y < tr2.C.Y) &&( tr1.B.Z<tr2.C.Z)&& 
-		 (tr1.C.X <tr2.A.X) &&( tr1.C.Y < tr2.A.Y) &&( tr1.C.Z<tr2.A.Z)&& 
-		 (tr1.C.X <tr2.B.X) &&( tr1.C.Y < tr2.B.Y) &&( tr1.C.Z<tr2.B.Z)&& 
-		 (tr1.C.X <tr2.C.X) &&( tr1.C.Y < tr2.C.Y) &&( tr1.C.Z<tr2.C.Z))
-		||		 	
-		((tr1.A.X > tr2.A.X)&& (tr1.A.Y > tr2.A.Y )&& (tr1.A.Z > tr2.A.Z)&&
-		 (tr1.A.X > tr2.B.X)&& (tr1.A.Y > tr2.B.Y )&& (tr1.A.Z > tr2.B.Z)&&
-		 (tr1.A.X > tr2.C.X)&& (tr1.A.Y > tr2.C.Y )&& (tr1.A.Z > tr2.C.Z)&&
-		 (tr1.B.X > tr2.A.X)&& (tr1.B.Y > tr2.A.Y )&& (tr1.B.Z > tr2.A.Z)&&
-		 (tr1.B.X > tr2.B.X)&& (tr1.B.Y > tr2.B.Y )&& (tr1.B.Z > tr2.B.Z)&&
-		 (tr1.B.X > tr2.C.X)&& (tr1.B.Y > tr2.C.Y )&& (tr1.B.Z > tr2.C.Z)&&
-		 (tr1.C.X > tr2.A.X)&& (tr1.C.Y > tr2.A.Y )&& (tr1.C.Z > tr2.A.Z)&&
-		 (tr1.C.X > tr2.B.X)&& (tr1.C.Y > tr2.B.Y )&& (tr1.C.Z > tr2.B.Z)&&
-		 (tr1.C.X > tr2.C.X)&& (tr1.C.Y > tr2.C.Y )&& (tr1.C.Z > tr2.C.Z)))*/
-		 return true;
-	else return false;
+	if ((dv1 >= 0 && dv2 > 0 && dv3 > 0) || (dv1 < 0 && dv2 < 0 && dv3 < 0))
+		return true;
+	else
+		return false;
 
 }
 
@@ -146,13 +124,14 @@ bool IsTheSamePoints(Point p1, Point p2)
 	{
 		return true;
 	}
-	else return false;
+	else
+		return false;
 }
 
 //delete same points in array of intersection points
 void DeleteSamePoints(vector<Point>& points)
 {
-	for (int i = 0; i<points.size() ; i++) {
+	for (int i = 0; i < points.size(); i++) {
 		for (int j = i + 1; j < points.size(); j++)
 		{
 			if ((IsTheSamePoints(points[i], points[j])) == true)
@@ -178,9 +157,9 @@ void Sort(vector<Result>&intersection_points)
 		}
 	}
 }
-void CreatePolygons(vector<Result>&intersection_points,PolyModel model_a, PolyModel model_b, vector<Polygon> &polygons_a, vector<Polygon> &polygons_b)
+void CreatePolygons(vector<Result>&intersection_points, PolyModel model_a, PolyModel model_b, vector<Polygon> &polygons_a, vector<Polygon> &polygons_b)
 {
-	
+
 	for (int i = 0; i < intersection_points.size(); i++)
 	{
 		Polygon polygon_a;
@@ -199,9 +178,9 @@ void CreatePolygons(vector<Result>&intersection_points,PolyModel model_a, PolyMo
 		Triangle b = model_b.GetTriangleVertices(intersection_points[i].index_j);
 		polygon_b.points.push_back(b.A);
 		polygon_b.points.push_back(b.B);
-		polygon_b.points.push_back(b.C);		
+		polygon_b.points.push_back(b.C);
 		polygons_b.push_back(polygon_b);
-	}	
+	}
 }
 
 void DeleteSamePolygons(vector<Polygon> &polygons)
@@ -216,7 +195,7 @@ void DeleteSamePolygons(vector<Polygon> &polygons)
 				{
 					if (IsTheSamePoints(polygons[i].points[k], polygons[j].points[k]))
 					{
-						if (k == polygons[i].points.size()-1)
+						if (k == polygons[i].points.size() - 1)
 						{
 							polygons.erase(polygons.begin() + j);
 							j--;
@@ -227,6 +206,6 @@ void DeleteSamePolygons(vector<Polygon> &polygons)
 				}
 			}
 		}
-		
+
 	}
 }
