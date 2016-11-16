@@ -22,6 +22,7 @@ namespace rk9
 		void AddTriangle(Point p1, Point p2, Point p3);
 		void AddTriangle(Triangle t);
 		unsigned GetTrianglesCount();
+		void DeleteTriangle(unsigned index);
 
 		Triangle GetTriangleVertices(unsigned index);
 

@@ -9,8 +9,8 @@ namespace rk9
 {
 	struct IntersectionResult {
 		
-		unsigned index_i;//index of triangle in model a
-		unsigned index_j;//index of triangle in model b
+		int index_i;//index of triangle in model a
+		int index_j;//index of triangle in model b
 
 		vector<Point> points;//intersection points of triangle i and j		
 	};

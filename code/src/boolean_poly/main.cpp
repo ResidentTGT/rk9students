@@ -5,6 +5,7 @@
 #include "common/Triangle.h" 
 #include "IntersectionResult.h"
 #include "common\Vector3.h"
+#include <algorithm>
 using namespace std;
 using namespace rk9;
 
@@ -19,6 +20,7 @@ void DeleteSamePoints(vector<Point>& intersection_points);
 void DeleteSameIntersections(vector<IntersectionResult>&intersection_points);
 void UniteIntersectPointsWithTriangles(vector<IntersectionResult>&intersection_points, PolyModel model_a, PolyModel model_b, vector<Polygon> &polygons_a, vector<Polygon> &polygons_b);
 void DeleteSamePolygons(vector<Polygon> &polygons);
+PolyModel DeleteTrianglesFromModels(PolyModel model_a, vector<IntersectionResult>&intersection_points,int i);
 
 int main(int argc, char ** argv) {
 
@@ -35,19 +37,22 @@ int main(int argc, char ** argv) {
 	DeleteSamePolygons(polygons_a);
 	DeleteSamePolygons(polygons_b);
 
-
-
+	model_a=DeleteTrianglesFromModels(model_a, intersection_points,1);
+	model_b = DeleteTrianglesFromModels(model_b, intersection_points,2);
+	model_a.WriteToSTLFile(argv[3]);
+	model_b.WriteToSTLFile(argv[4]);
+	return 0;
 	//Из-за того, что модель состоит из треугольников, а в результате пересечения 
 	//мы получаем массив с количеством точек, не обязательно кратным 3, приходится 
 	//дублировать 1 или 2 точки, чтобы записать этот массив в STL-модель и отобразить рез-т
-	//intersection_points.push_back(intersection_points[4]);
-	//PolyModel modelz;
-	//for (int i = 0; i < intersection_points.size() - 2; i += 3)
-	//	modelz.AddTriangle(intersection_points[i], intersection_points[i + 1], intersection_points[i+2] );
+	/*intersection_points.push_back(intersection_points[4]);
+	PolyModel modelz;
+	for (int i = 0; i < intersection_points.size() - 2; i += 3)
+		modelz.AddTriangle(intersection_points[i]., intersection_points[i + 1], intersection_points[i+2] );
 
-	//modelz.WriteToSTLFile(argv[3]);
+	modelz.WriteToSTLFile(argv[3]);*/
 
-	return 0;
+	
 }
 
 vector<IntersectionResult> GetIntersectionPoints(PolyModel model_a, PolyModel model_b) {
@@ -108,7 +113,7 @@ bool IsPlaneBetweenTriangle(Triangle tr1, Triangle tr2) {
 	double dv2 = normal.A*tr2.B.X + normal.B*tr2.B.Y + normal.C*tr2.B.Z + d2;
 	double dv3 = normal.A*tr2.C.X + normal.B*tr2.C.Y + normal.C*tr2.C.Z + d2;
 	//если все расстояния не равны нулю и имеют одинаковый знак, то треугольник лежит по одну сторону от плоскости другого, пересечение исключается
-	((dv1 > 0 && dv2 > 0 && dv3 > 0) || (dv1 < 0 && dv2 < 0 && dv3 < 0)) ? return true : return false;
+	return ((dv1 > 0 && dv2 > 0 && dv3 > 0) || (dv1 < 0 && dv2 < 0 && dv3 < 0));
 		
 }
 
@@ -194,3 +199,69 @@ void DeleteSamePolygons(vector<Polygon> &polygons)
 
 	}
 }
+
+PolyModel DeleteTrianglesFromModels(PolyModel model, vector<IntersectionResult>& intersection_points,int i)
+{
+	if (i == 1) {
+		vector<int> tr_indexes_model;
+
+		for (int i = 0; i < intersection_points.size(); i++)
+		{
+			tr_indexes_model.push_back(intersection_points[i].index_i);
+
+		}
+
+		for (int i = 0; i < tr_indexes_model.size(); i++)
+		{
+			for (int j = i + 1; j < tr_indexes_model.size(); j++)
+			{
+				if (tr_indexes_model[i] == tr_indexes_model[j])
+				{
+					tr_indexes_model.erase(tr_indexes_model.begin() + j);
+					j--;
+				}
+			}
+		}
+
+
+		sort(tr_indexes_model.begin(), tr_indexes_model.end());
+
+		for (int i = tr_indexes_model.size() - 1; i > -1; i--)
+		{
+			model.DeleteTriangle(tr_indexes_model[i]);
+		}
+		return model;
+	}
+	else
+	{
+		vector<int> tr_indexes_model;
+
+		for (int i = 0; i < intersection_points.size(); i++)
+		{
+			tr_indexes_model.push_back(intersection_points[i].index_j);
+
+		}
+
+		for (int i = 0; i < tr_indexes_model.size(); i++)
+		{
+			for (int j = i + 1; j < tr_indexes_model.size(); j++)
+			{
+				if (tr_indexes_model[i] == tr_indexes_model[j])
+				{
+					tr_indexes_model.erase(tr_indexes_model.begin() + j);
+					j--;
+				}
+			}
+		}
+
+
+		sort(tr_indexes_model.begin(), tr_indexes_model.end());
+
+		for (int i = tr_indexes_model.size() - 1; i > -1; i--)
+		{
+			model.DeleteTriangle(tr_indexes_model[i]);
+		}
+		return model;
+	}
+}
+

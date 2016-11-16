@@ -122,6 +122,11 @@ namespace rk9
 	{
 		Triangles.emplace_back(t);
 	}
+
+	void PolyModel::DeleteTriangle(unsigned index)
+	{
+		Triangles.erase(Triangles.begin() + index);
+	}
 	
 	//return the number of triangles in polymodel
 	unsigned PolyModel::GetTrianglesCount() {
