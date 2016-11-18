@@ -20,7 +20,11 @@ void DeleteSamePoints(vector<Point>& intersection_points);
 void DeleteSameIntersections(vector<IntersectionResult>&intersection_points);
 void UniteIntersectPointsWithTriangles(vector<IntersectionResult>&intersection_points, PolyModel model_a, PolyModel model_b, vector<Polygon> &polygons_a, vector<Polygon> &polygons_b);
 void DeleteSamePolygons(vector<Polygon> &polygons);
-PolyModel DeleteTrianglesFromModels(PolyModel model_a, vector<IntersectionResult>&intersection_points,int i);
+PolyModel DeleteTrianglesFromModels(PolyModel model_a, vector<IntersectionResult>&intersection_points, int i);
+vector<PolyModel> DivideModels(PolyModel model_a, PolyModel model_b);
+PolyModel AdditionOfModels(PolyModel model_a, PolyModel model_b);
+PolyModel SubstractionModelaModelb(PolyModel model_a, PolyModel model_b);
+PolyModel IntersectModels(PolyModel model_a,PolyModel model_b);
 
 int main(int argc, char ** argv) {
 
@@ -37,21 +41,24 @@ int main(int argc, char ** argv) {
 	DeleteSamePolygons(polygons_a);
 	DeleteSamePolygons(polygons_b);
 
-	model_a=DeleteTrianglesFromModels(model_a, intersection_points,1);
-	model_b = DeleteTrianglesFromModels(model_b, intersection_points,2);
-	model_a.WriteToSTLFile(argv[3]);
-	model_b.WriteToSTLFile(argv[4]);
+	model_a = DeleteTrianglesFromModels(model_a, intersection_points, 1);
+	model_b = DeleteTrianglesFromModels(model_b, intersection_points, 2);
+	
+	//AddToModela(Triangulate(polygons_a));
+	//AddToModela(Triangulate(polygons_b));
+	vector<PolyModel> polymodels = DivideModels(model_a, model_b);
+	
+	PolyModel result1, result2, result3, result4;
+	result1=AdditionOfModels(polymodels[2],polymodels[3]);
+	result2= SubstractionModelaModelb(polymodels[0], polymodels[3]);
+	result3=SubstractionModelaModelb(polymodels[1], polymodels[2]);
+	result4=IntersectModels(polymodels[0], polymodels[1]);
+	result1.WriteToSTLFile(argv[3]);
+	result2.WriteToSTLFile(argv[4]);
+	result3.WriteToSTLFile(argv[5]);
+	result4.WriteToSTLFile(argv[6]);
+
 	return 0;
-	//Из-за того, что модель состоит из треугольников, а в результате пересечения 
-	//мы получаем массив с количеством точек, не обязательно кратным 3, приходится 
-	//дублировать 1 или 2 точки, чтобы записать этот массив в STL-модель и отобразить рез-т
-	/*intersection_points.push_back(intersection_points[4]);
-	PolyModel modelz;
-	for (int i = 0; i < intersection_points.size() - 2; i += 3)
-		modelz.AddTriangle(intersection_points[i]., intersection_points[i + 1], intersection_points[i+2] );
-
-	modelz.WriteToSTLFile(argv[3]);*/
-
 	
 }
 
@@ -114,7 +121,7 @@ bool IsPlaneBetweenTriangle(Triangle tr1, Triangle tr2) {
 	double dv3 = normal.A*tr2.C.X + normal.B*tr2.C.Y + normal.C*tr2.C.Z + d2;
 	//если все расстояния не равны нулю и имеют одинаковый знак, то треугольник лежит по одну сторону от плоскости другого, пересечение исключается
 	return ((dv1 > 0 && dv2 > 0 && dv3 > 0) || (dv1 < 0 && dv2 < 0 && dv3 < 0));
-		
+
 }
 
 
@@ -200,7 +207,7 @@ void DeleteSamePolygons(vector<Polygon> &polygons)
 	}
 }
 
-PolyModel DeleteTrianglesFromModels(PolyModel model, vector<IntersectionResult>& intersection_points,int i)
+PolyModel DeleteTrianglesFromModels(PolyModel model, vector<IntersectionResult>& intersection_points, int i)
 {
 	if (i == 1) {
 		vector<int> tr_indexes_model;
@@ -264,4 +271,122 @@ PolyModel DeleteTrianglesFromModels(PolyModel model, vector<IntersectionResult>&
 		return model;
 	}
 }
+
+vector<PolyModel> DivideModels(PolyModel model_a, PolyModel model_b)
+{
+	vector<PolyModel> polymodels;
+	PolyModel differ1, differ2;
+	PolyModel model_c = model_a;
+	PolyModel model_d = model_b;
+	int del = 0;
+	for (int i = 0; i < model_a.GetTrianglesCount(); i++)
+	{
+		
+		int key = 0;
+		Triangle tr = model_a.GetTriangleVertices(i);
+		Vector3 v1(tr.A, tr.B);
+		Vector3 v2(tr.A, tr.C);
+		Vector3 normal = normal.CrossProduct(v1, v2);
+		Point p1((tr.A.X+tr.B.X+tr.C.X)/3, (tr.A.Y + tr.B.Y + tr.C.Y) / 3, (tr.A.Z + tr.B.Z + tr.C.Z) / 3);
+		Point p2(p1.X + normal.A, p1.Y + normal.B, p1.Z + normal.C);
+		for (int j = 0; j < model_b.GetTrianglesCount(); j++)
+		{
+			
+			Point intersect_point;
+			Triangle trr = model_b.GetTriangleVertices(j);
+			Plane plane = trr.GetPlane();
+			if (plane.GetIntersectionWithLine(p1, p2, intersect_point)&& (intersect_point.X > p1.X) && trr.IsPointInsideTriangle(intersect_point))
+			{
+			
+					key++;
+			}			
+		}
+		if (key % 2 != 0)
+		{
+			differ1.AddTriangle(tr);
+			model_c.DeleteTriangle(i-del);
+			del++;
+		}
+		key = 0;
+
+	}
+	 del = 0;
+	for (int i = 0; i < model_b.GetTrianglesCount(); i++)
+	{
+		
+		int key = 0;
+		Triangle tr = model_b.GetTriangleVertices(i);
+		Vector3 v1(tr.A, tr.B);
+		Vector3 v2(tr.A, tr.C);
+		Vector3 normal = normal.CrossProduct(v1, v2);
+		Point p1(tr.A.X, tr.A.Y, tr.A.Z);
+		Point p2(tr.A.X + normal.A, tr.A.Y + normal.B, tr.A.Z + normal.C);
+		for (int j = 0; j < model_a.GetTrianglesCount(); j++)
+		{
+		
+			Point intersect_point;
+			Triangle trr = model_a.GetTriangleVertices(j);
+			Plane plane = trr.GetPlane();
+			if (plane.GetIntersectionWithLine(p1, p2, intersect_point) && (intersect_point.X > p1.X) && trr.IsPointInsideTriangle(intersect_point))
+			{
+
+				key++;
+			}
+			
+		}
+		if (key % 2 != 0)
+		{
+			differ2.AddTriangle(tr);
+			model_d.DeleteTriangle(i-del);
+			del++;
+		}
+		key = 0;
+	}
+	polymodels.push_back(differ1);
+	polymodels.push_back(differ2);
+	polymodels.push_back(model_c);
+	polymodels.push_back(model_d);
+	return polymodels;
+}
+PolyModel IntersectModels(PolyModel model_a, PolyModel model_b)
+{	
+	PolyModel c;
+	for (int i = 0; i < model_a.GetTrianglesCount(); i++)
+	{
+		c.AddTriangle(model_a.GetTriangleVertices(i));
+	}
+	for (int i = 0; i < model_b.GetTrianglesCount(); i++)
+	{
+		c.AddTriangle(model_b.GetTriangleVertices(i));
+	}
+	return c;
+}
+PolyModel AdditionOfModels(PolyModel model_a, PolyModel model_b)
+{
+	PolyModel c;
+	for (int i = 0; i < model_a.GetTrianglesCount(); i++)
+	{
+		c.AddTriangle(model_a.GetTriangleVertices(i));
+	}
+	for (int i = 0; i < model_b.GetTrianglesCount(); i++)
+	{
+		c.AddTriangle(model_b.GetTriangleVertices(i));
+	}
+	return c;
+}
+
+PolyModel SubstractionModelaModelb(PolyModel model_a, PolyModel model_b)
+{
+	PolyModel c;
+	for (int i = 0; i < model_a.GetTrianglesCount(); i++)
+	{
+		c.AddTriangle(model_a.GetTriangleVertices(i));
+	}
+	for (int i = 0; i < model_b.GetTrianglesCount(); i++)
+	{
+		c.AddTriangle(model_b.GetTriangleVertices(i));
+	}
+	return c;
+}
+
 
