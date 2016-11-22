@@ -14,7 +14,7 @@ using namespace rk9;
 // Возвращает координаты точек пересечения с индексами треугольников, образующих пересечение
 vector<IntersectionResult> GetIntersectionPoints(PolyModel model_a, PolyModel model_b);
 void IntersectTriangles(Triangle tr1, Triangle tr2, vector<IntersectionResult>& intersection_points, int i, int j);
-void IntersectEdgeTriangle(Point, Point, Triangle tr1, Triangle tr2, vector<IntersectionResult>& intersection_points, int i, int j);
+Point IntersectEdgeTriangle(Point, Point, Triangle tr1, Triangle tr2, vector<IntersectionResult>& intersection_points, int i, int j);
 bool IsPlaneBetweenTriangle(Triangle tr1, Triangle tr2);
 void DeleteSamePoints(vector<Point>& intersection_points);
 void DeleteSameIntersections(vector<IntersectionResult>&intersection_points);
@@ -24,7 +24,7 @@ PolyModel DeleteTrianglesFromModels(PolyModel model_a, vector<IntersectionResult
 vector<PolyModel> DivideModels(PolyModel model_a, PolyModel model_b);
 PolyModel AdditionOfModels(PolyModel model_a, PolyModel model_b);
 PolyModel SubstractionModelaModelb(PolyModel model_a, PolyModel model_b);
-PolyModel IntersectModels(PolyModel model_a,PolyModel model_b);
+PolyModel IntersectModels(PolyModel model_a, PolyModel model_b);
 
 int main(int argc, char ** argv) {
 
@@ -43,28 +43,28 @@ int main(int argc, char ** argv) {
 
 	model_a = DeleteTrianglesFromModels(model_a, intersection_points, 1);
 	model_b = DeleteTrianglesFromModels(model_b, intersection_points, 2);
-	
+
 	//AddToModela(Triangulate(polygons_a));
 	//AddToModela(Triangulate(polygons_b));
 	vector<PolyModel> polymodels = DivideModels(model_a, model_b);
-	
+
 	PolyModel result1, result2, result3, result4;
-	result1=AdditionOfModels(polymodels[2],polymodels[3]);
-	result2= SubstractionModelaModelb(polymodels[0], polymodels[3]);
-	result3=SubstractionModelaModelb(polymodels[1], polymodels[2]);
-	result4=IntersectModels(polymodels[0], polymodels[1]);
+	result1 = AdditionOfModels(polymodels[2], polymodels[3]);
+	result2 = SubstractionModelaModelb(polymodels[0], polymodels[3]);
+	result3 = SubstractionModelaModelb(polymodels[1], polymodels[2]);
+	result4 = IntersectModels(polymodels[0], polymodels[1]);
 	result1.WriteToSTLFile(argv[3]);
 	result2.WriteToSTLFile(argv[4]);
 	result3.WriteToSTLFile(argv[5]);
 	result4.WriteToSTLFile(argv[6]);
 
 	return 0;
-	
+
 }
 
-vector<IntersectionResult> GetIntersectionPoints(PolyModel model_a, PolyModel model_b) {
-	vector<IntersectionResult> IntersectionResults;
+vector<PolyModel> GetIntersectModels(PolyModel model_a, PolyModel model_b) {
 
+	vector<PolyModel> polymodels;
 	unsigned triangles_count_A = model_a.GetTrianglesCount();
 	unsigned triangles_count_B = model_b.GetTrianglesCount();
 
@@ -75,38 +75,42 @@ vector<IntersectionResult> GetIntersectionPoints(PolyModel model_a, PolyModel mo
 			Triangle tr2 = model_b.GetTriangleVertices(j);
 
 			if (IsPlaneBetweenTriangle(tr1, tr2) == false)
-				IntersectTriangles(tr1, tr2, IntersectionResults, i, j);//points of intersection of 2 triangles 			
+				IntersectTriangles(tr1, tr2);//points of intersection of 2 triangles 			
 		}
 	}
-	return IntersectionResults;
+	return polymodels;
 }
 
 //finding the intersection between the edge of one triangle and plane of another
-void IntersectTriangles(Triangle tr1, Triangle tr2, vector<IntersectionResult> &IntersectionResults, int index_i, int index_j) {
-	IntersectEdgeTriangle(tr1.A, tr1.B, tr2, tr1, IntersectionResults, index_i, index_j);
-	IntersectEdgeTriangle(tr1.A, tr1.C, tr2, tr1, IntersectionResults, index_i, index_j);
-	IntersectEdgeTriangle(tr1.B, tr1.C, tr2, tr1, IntersectionResults, index_i, index_j);
+vector<Point> IntersectTriangles(Triangle tr1, Triangle tr2) {
+	vector<Point> intersect_points;
+	Point intersect_point;
+	if (IntersectEdgeTriangle(tr1.A, tr1.B, tr2, tr1, intersect_point))
+		intersect_points.push_back(intersect_point);
+	if (IntersectEdgeTriangle(tr1.A, tr1.C, tr2, tr1, intersect_point))
+		intersect_points.push_back(intersect_point);
+	if (IntersectEdgeTriangle(tr1.B, tr1.C, tr2, tr1, intersect_point))
+		intersect_points.push_back(intersect_point);
 
-	IntersectEdgeTriangle(tr2.A, tr2.B, tr1, tr2, IntersectionResults, index_i, index_j);
-	IntersectEdgeTriangle(tr2.A, tr2.C, tr1, tr2, IntersectionResults, index_i, index_j);
-	IntersectEdgeTriangle(tr2.B, tr2.C, tr1, tr2, IntersectionResults, index_i, index_j);
+	if (IntersectEdgeTriangle(tr2.A, tr2.B, tr1, tr2, intersect_point))
+		intersect_points.push_back(intersect_point);
+	if (IntersectEdgeTriangle(tr2.A, tr2.C, tr1, tr2, intersect_point))
+		intersect_points.push_back(intersect_point);
+	if (IntersectEdgeTriangle(tr2.B, tr2.C, tr1, tr2, intersect_point))
+		intersect_points.push_back(intersect_point);
+
+	return intersect_points;
 }
 
 //Находит пересечение ребра с треугольником и записывает координаты точки пересечения с индексами пересекающихся треугольников
-void IntersectEdgeTriangle(Point point1, Point point2, Triangle tr1, Triangle tr2, vector<IntersectionResult> &IntersectionResults, int index_i, int index_j) {
+bool IntersectEdgeTriangle(Point point1, Point point2, Triangle tr1, Triangle tr2, Point intersect_point) {
 	Plane plane = tr1.GetPlane();
-	Point intersect_point;
 	if (plane.GetIntersectionWithLine(point1, point2, intersect_point))
 	{
 		if (tr1.IsPointInsideTriangle(intersect_point) && tr2.IsPointInsideTriangle(intersect_point))// check if finded point lies in triangles
-		{
-			IntersectionResult result;
-			result.points.push_back(intersect_point);
-			result.index_i = index_i;
-			result.index_j = index_j;
-			IntersectionResults.push_back(result);
-		}
+			return true;
 	}
+	return false;
 }
 
 //Проверяет, может ли провести плоскость между двумя треугольниками. Если да, то пересеченеи исключается
@@ -281,39 +285,39 @@ vector<PolyModel> DivideModels(PolyModel model_a, PolyModel model_b)
 	int del = 0;
 	for (int i = 0; i < model_a.GetTrianglesCount(); i++)
 	{
-		
+
 		int key = 0;
 		Triangle tr = model_a.GetTriangleVertices(i);
 		Vector3 v1(tr.A, tr.B);
 		Vector3 v2(tr.A, tr.C);
 		Vector3 normal = normal.CrossProduct(v1, v2);
-		Point p1((tr.A.X+tr.B.X+tr.C.X)/3, (tr.A.Y + tr.B.Y + tr.C.Y) / 3, (tr.A.Z + tr.B.Z + tr.C.Z) / 3);
+		Point p1((tr.A.X + tr.B.X + tr.C.X) / 3, (tr.A.Y + tr.B.Y + tr.C.Y) / 3, (tr.A.Z + tr.B.Z + tr.C.Z) / 3);
 		Point p2(p1.X + normal.A, p1.Y + normal.B, p1.Z + normal.C);
 		for (int j = 0; j < model_b.GetTrianglesCount(); j++)
 		{
-			
+
 			Point intersect_point;
 			Triangle trr = model_b.GetTriangleVertices(j);
 			Plane plane = trr.GetPlane();
-			if (plane.GetIntersectionWithLine(p1, p2, intersect_point)&& (intersect_point.X > p1.X) && trr.IsPointInsideTriangle(intersect_point))
+			if (plane.GetIntersectionWithLine(p1, p2, intersect_point) && (intersect_point.X > p1.X) && trr.IsPointInsideTriangle(intersect_point))
 			{
-			
-					key++;
-			}			
+
+				key++;
+			}
 		}
 		if (key % 2 != 0)
 		{
 			differ1.AddTriangle(tr);
-			model_c.DeleteTriangle(i-del);
+			model_c.DeleteTriangle(i - del);
 			del++;
 		}
 		key = 0;
 
 	}
-	 del = 0;
+	del = 0;
 	for (int i = 0; i < model_b.GetTrianglesCount(); i++)
 	{
-		
+
 		int key = 0;
 		Triangle tr = model_b.GetTriangleVertices(i);
 		Vector3 v1(tr.A, tr.B);
@@ -323,7 +327,7 @@ vector<PolyModel> DivideModels(PolyModel model_a, PolyModel model_b)
 		Point p2(tr.A.X + normal.A, tr.A.Y + normal.B, tr.A.Z + normal.C);
 		for (int j = 0; j < model_a.GetTrianglesCount(); j++)
 		{
-		
+
 			Point intersect_point;
 			Triangle trr = model_a.GetTriangleVertices(j);
 			Plane plane = trr.GetPlane();
@@ -332,12 +336,12 @@ vector<PolyModel> DivideModels(PolyModel model_a, PolyModel model_b)
 
 				key++;
 			}
-			
+
 		}
 		if (key % 2 != 0)
 		{
 			differ2.AddTriangle(tr);
-			model_d.DeleteTriangle(i-del);
+			model_d.DeleteTriangle(i - del);
 			del++;
 		}
 		key = 0;
@@ -349,7 +353,7 @@ vector<PolyModel> DivideModels(PolyModel model_a, PolyModel model_b)
 	return polymodels;
 }
 PolyModel IntersectModels(PolyModel model_a, PolyModel model_b)
-{	
+{
 	PolyModel c;
 	for (int i = 0; i < model_a.GetTrianglesCount(); i++)
 	{
