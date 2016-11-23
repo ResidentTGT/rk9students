@@ -20,11 +20,17 @@ message(STATUS "App: ${target}")
 # 
 # Sources
 # 
-set(headers
-    Result.h
-)
+
 set(sources
+	Intersection.cpp
+	Operation.cpp
+	Polygon.cpp
     main.cpp
+)
+set(headers
+    Intersection.h
+	Operation.h
+	Polygon.h
 )
 
 
@@ -36,6 +42,7 @@ set(sources
 add_executable(${target}
     MACOSX_BUNDLE
     ${sources}
+	${headers}
 )
 
 
