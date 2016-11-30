@@ -36,8 +36,8 @@ namespace rk9
 		~Point() {}
 
 		bool operator==(const rk9::Point& p) const
-		{
-			return (X == p.X && Y == p.Y && Z == p.Z);
+		{			
+			return (X == p.X && Y == p.Y && Z == p.Z);			
 		}
 	};
 

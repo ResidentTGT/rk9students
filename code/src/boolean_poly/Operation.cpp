@@ -12,6 +12,13 @@ namespace rk9
 		Intersection::IntersectModels(model_a, model_b, polygons_a, polygons_b);
 		//”дал€ет пересекающиес€ треугольники из моделей
 		Intersection::DeletePolygons(model_a, model_b, polygons_a, polygons_b);
+
+		/*PolyModel g;
+		g.AddTriangle(polygons_a[4].points[0], polygons_a[4].points[1], polygons_a[4].points[2]);
+		g.AddTriangle(polygons_a[4].points[3], polygons_a[4].points[4], polygons_a[4].points[5]);
+		g.AddTriangle(polygons_a[4].points[6], polygons_a[4].points[7], polygons_a[4].points[8]);
+		g.WriteToSTLFile("A:/dev/rk9students/doc/Romanov/TestingModels/a.stl");*/
+			
 		//“риангул€ци€ полигонов
 		//Triangulate(polygons_a);
 		//Triangulate(polygons_b);

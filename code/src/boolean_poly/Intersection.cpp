@@ -90,27 +90,28 @@ namespace rk9
 		PolyModel differ1, differ2;
 		PolyModel model_c = model_a;
 		PolyModel model_d = model_b;
+
 		int del = 0;
 		for (int i = 0; i < model_a.GetTrianglesCount(); i++)
 		{
 			int key = 0;
-			Triangle tr = model_a.GetTriangleVertices(i);
-			Vector3 v1(tr.A, tr.B);
-			Vector3 v2(tr.A, tr.C);
+			Triangle tr1 = model_a.GetTriangleVertices(i);
+			Vector3 v1(tr1.A, tr1.B);
+			Vector3 v2(tr1.A, tr1.C);
 			Vector3 normal = Vector3::CrossProduct(v1, v2);
-			Point p1((tr.A.X + tr.B.X + tr.C.X) / 3, (tr.A.Y + tr.B.Y + tr.C.Y) / 3, (tr.A.Z + tr.B.Z + tr.C.Z) / 3);
+			Point p1((tr1.A.X + tr1.B.X + tr1.C.X) / 3, (tr1.A.Y + tr1.B.Y + tr1.C.Y) / 3, (tr1.A.Z + tr1.B.Z + tr1.C.Z) / 3);
 			Point p2(p1.X + normal.A, p1.Y + normal.B, p1.Z + normal.C);
 			for (int j = 0; j < model_b.GetTrianglesCount(); j++)
 			{
 				Point intersect_point;
-				Triangle trr = model_b.GetTriangleVertices(j);
-				Plane plane = trr.GetPlane();
-				if (plane.GetIntersectionWithLine(p1, p2, intersect_point) && (intersect_point.X > p1.X) && trr.IsPointInsideTriangle(intersect_point))
+				Triangle tr2 = model_b.GetTriangleVertices(j);
+				Plane plane = tr2.GetPlane();
+				if (plane.GetIntersectionWithLine(p1, p2, intersect_point) && (intersect_point.X > p1.X) && tr2.IsPointInsideTriangle(intersect_point))
 					key++;
 			}
 			if (key % 2 != 0)
 			{
-				differ1.AddTriangle(tr);
+				differ1.AddTriangle(tr1);
 				model_c.DeleteTriangle(i - del);
 				del++;
 			}
@@ -121,23 +122,23 @@ namespace rk9
 		for (int i = 0; i < model_b.GetTrianglesCount(); i++)
 		{
 			int key = 0;
-			Triangle tr = model_b.GetTriangleVertices(i);
-			Vector3 v1(tr.A, tr.B);
-			Vector3 v2(tr.A, tr.C);
+			Triangle tr1 = model_b.GetTriangleVertices(i);
+			Vector3 v1(tr1.A, tr1.B);
+			Vector3 v2(tr1.A, tr1.C);
 			Vector3 normal = Vector3::CrossProduct(v1, v2);
-			Point p1(tr.A.X, tr.A.Y, tr.A.Z);
-			Point p2(tr.A.X + normal.A, tr.A.Y + normal.B, tr.A.Z + normal.C);
+			Point p1(tr1.A.X, tr1.A.Y, tr1.A.Z);
+			Point p2(tr1.A.X + normal.A, tr1.A.Y + normal.B, tr1.A.Z + normal.C);
 			for (int j = 0; j < model_a.GetTrianglesCount(); j++)
 			{
 				Point intersect_point;
-				Triangle trr = model_a.GetTriangleVertices(j);
-				Plane plane = trr.GetPlane();
-				if (plane.GetIntersectionWithLine(p1, p2, intersect_point) && (intersect_point.X > p1.X) && trr.IsPointInsideTriangle(intersect_point))
+				Triangle tr2 = model_a.GetTriangleVertices(j);
+				Plane plane = tr2.GetPlane();
+				if (plane.GetIntersectionWithLine(p1, p2, intersect_point) && (intersect_point.X > p1.X) && tr2.IsPointInsideTriangle(intersect_point))
 					key++;
 			}
 			if (key % 2 != 0)
 			{
-				differ2.AddTriangle(tr);
+				differ2.AddTriangle(tr1);
 				model_d.DeleteTriangle(i - del);
 				del++;
 			}
@@ -176,7 +177,14 @@ namespace rk9
 			Triangle tr = model_a.GetTriangleVertices(polygons_a[i].triangle_index);
 		}
 	}
-	void Intersection::UnitePolygons(vector<Polygon>&polygons, PolyModel model)
+
+	bool ComparePointsWithEps(Point p1, Point p2)
+	{
+		double Eps = 0.0000001;
+		return ((abs(p1.X - p2.X) < Eps) && (abs(p1.Y - p2.Y) < Eps) && (abs(p1.Z - p2.Z) < Eps));
+	}
+
+	void Intersection::UnitePolygons(vector<Polygon>&polygons, PolyModel& model)
 	{
 		for (int i = 0; i < polygons.size(); i++)
 		{
@@ -199,6 +207,20 @@ namespace rk9
 			polygons[i].points.push_back(tr.B);
 			polygons[i].points.push_back(tr.C);
 		}
+		for (int i = 0; i < polygons.size(); i++)
+		{
+			for (int j = 0; j < polygons[i].points.size(); j++)
+			{
+				for (int k = j + 1; k < polygons[i].points.size(); k++)
+				{
+					if (ComparePointsWithEps(polygons[i].points[j], polygons[i].points[k]))
+					{
+						polygons[i].points.erase(polygons[i].points.begin() + k);
+						k--;
+					}
+				}
+			}
+		}
 	}
 
 	PolyModel Intersection::UnitePolymodels(PolyModel& model_a, PolyModel& model_b)
@@ -207,4 +229,6 @@ namespace rk9
 			model_a.AddTriangle(model_b.GetTriangleVertices(i));
 		return model_a;
 	}
+
+
 }

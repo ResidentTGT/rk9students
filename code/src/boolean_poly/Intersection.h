@@ -16,7 +16,7 @@ namespace rk9
 		static vector<PolyModel> DivideModels(PolyModel model_a, PolyModel model_b);
 		static void DeletePolygons(PolyModel & model_a, PolyModel & model_b, vector<Polygon>& polygons_a, vector<Polygon>& polygons_b);
 		static void AddPolygonsToModel(PolyModel & model_a, vector<Polygon>& polygons_a);
-		static void UnitePolygons(vector<Polygon>& polygons, PolyModel model);
+		static void UnitePolygons(vector<Polygon>& polygons, PolyModel& model);
 		static PolyModel UnitePolymodels(PolyModel& model_a, PolyModel& model_b);
 	};
 }
