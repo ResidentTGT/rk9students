@@ -45,6 +45,7 @@ set(sources
 	${source_path}/PolyModel.cpp
 	${source_path}/Triangle.cpp
 	${source_path}/Vector3.cpp
+	${source_path}/Point.cpp
 )
 
 # Group source files

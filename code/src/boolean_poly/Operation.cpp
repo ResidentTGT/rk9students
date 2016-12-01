@@ -1,33 +1,37 @@
-#include "Operation.h"
+п»ї#include "Operation.h"
 #include <algorithm>
 #include "Intersection.h"
+#include "TrianglesBuilder.h"
 using namespace std;
 namespace rk9
 {
+	
+
 	PolyModel Operation::Add(PolyModel model_a, PolyModel model_b)
 	{
+		
 		vector<Polygon> polygons_a, polygons_b;
-		//Находит пересечение моделей a и b и записывает результаты пересечения в полигоны (polygons_a,polygons_b).
-		//Один полигон включает в себя точки пересечения двух треугольников и индекс треугольника одной из моделей(a или b).
+		//РќР°С…РѕРґРёС‚ РїРµСЂРµСЃРµС‡РµРЅРёРµ РјРѕРґРµР»РµР№ a Рё b Рё Р·Р°РїРёСЃС‹РІР°РµС‚ СЂРµР·СѓР»СЊС‚Р°С‚С‹ РїРµСЂРµСЃРµС‡РµРЅРёСЏ РІ РїРѕР»РёРіРѕРЅС‹ (polygons_a,polygons_b).
+		//РћРґРёРЅ РїРѕР»РёРіРѕРЅ РІРєР»СЋС‡Р°РµС‚ РІ СЃРµР±СЏ С‚РѕС‡РєРё РїРµСЂРµСЃРµС‡РµРЅРёСЏ РґРІСѓС… С‚СЂРµСѓРіРѕР»СЊРЅРёРєРѕРІ Рё РёРЅРґРµРєСЃ С‚СЂРµСѓРіРѕР»СЊРЅРёРєР° РѕРґРЅРѕР№ РёР· РјРѕРґРµР»РµР№(a РёР»Рё b).
 		Intersection::IntersectModels(model_a, model_b, polygons_a, polygons_b);
-		//Удаляет пересекающиеся треугольники из моделей
-		Intersection::DeletePolygons(model_a, model_b, polygons_a, polygons_b);
+		//РЈРґР°Р»СЏРµС‚ РїРµСЂРµСЃРµРєР°СЋС‰РёРµСЃСЏ С‚СЂРµСѓРіРѕР»СЊРЅРёРєРё РёР· РјРѕРґРµР»РµР№
+		Intersection::DeletePolygons(model_a, model_b, polygons_a, polygons_b);					
+		//РўСЂРёР°РЅРіСѓР»СЏС†РёСЏ РїРѕР»РёРіРѕРЅРѕРІ
+		//Intersection::WritePolygonsToModel(polygons_a);
+		vector<Triangle> triangulation_a;
+		TrianglesBuilder::buildIntersectionArea(triangulation_a, polygons_a);
+		vector<Triangle> triangulation_b;
+		TrianglesBuilder::buildIntersectionArea(triangulation_b, polygons_b);
 
-		/*PolyModel g;
-		g.AddTriangle(polygons_a[4].points[0], polygons_a[4].points[1], polygons_a[4].points[2]);
-		g.AddTriangle(polygons_a[4].points[3], polygons_a[4].points[4], polygons_a[4].points[5]);
-		g.AddTriangle(polygons_a[4].points[6], polygons_a[4].points[7], polygons_a[4].points[8]);
-		g.WriteToSTLFile("A:/dev/rk9students/doc/Romanov/TestingModels/a.stl");*/
-			
-		//Триангуляция полигонов
-		//Triangulate(polygons_a);
-		//Triangulate(polygons_b);
-		//Добавление триангулизированных полигонов в модели
-		//AddPolygonsToModel(model_a, polygons_a);
-		//AddPolygonsToModel(model_b, polygons_b);
-		//Разбиение моделей на 4 части: 2 участка пересечения и 2 оставшиеся части моделей
-		vector<PolyModel> polymodels = Intersection::DivideModels(model_a, model_b);
+		//Р”РѕР±Р°РІР»РµРЅРёРµ С‚СЂРёР°РЅРіСѓР»РёСЂРѕРІР°РЅРЅС‹С… С‚СЂРµСѓРіРѕР»СЊРЅРёРєРѕРІ РІ РјРѕРґРµР»Рё
+		model_a.AddTriangles(triangulation_a);
+		model_b.AddTriangles(triangulation_b);
+	
+		//Р Р°Р·Р±РёРµРЅРёРµ РјРѕРґРµР»РµР№ РЅР° 4 С‡Р°СЃС‚Рё: 2 СѓС‡Р°СЃС‚РєР° РїРµСЂРµСЃРµС‡РµРЅРёСЏ Рё 2 РѕСЃС‚Р°РІС€РёРµСЃСЏ С‡Р°СЃС‚Рё РјРѕРґРµР»РµР№
+		vector<PolyModel> polymodels = Intersection::DivideModels(model_a, model_b);	
+		
 		PolyModel result = Intersection::UnitePolymodels(polymodels[0], polymodels[1]);
+		//PolyModel result = model_c;
 		return result;
 	}
 
@@ -36,10 +40,12 @@ namespace rk9
 		vector<Polygon> polygons_a, polygons_b;		
 		Intersection::IntersectModels(model_a, model_b, polygons_a, polygons_b);
 		Intersection::DeletePolygons(model_a, model_b, polygons_a, polygons_b);
-		//Triangulate(polygons_a);
-		//Triangulate(polygons_b);		
-		//AddPolygonsToModel(model_a, polygons_a);
-		//AddPolygonsToModel(model_b, polygons_b);		
+		vector<Triangle> triangulation_a;
+		TrianglesBuilder::buildIntersectionArea(triangulation_a, polygons_a);
+		vector<Triangle> triangulation_b;
+		TrianglesBuilder::buildIntersectionArea(triangulation_b, polygons_b);
+		model_a.AddTriangles(triangulation_a);
+		model_b.AddTriangles(triangulation_b);
 		vector<PolyModel> polymodels = Intersection::DivideModels(model_a, model_b);
 		PolyModel result = Intersection::UnitePolymodels(polymodels[2], polymodels[3]);
 		return result;
@@ -50,10 +56,12 @@ namespace rk9
 		vector<Polygon> polygons_a, polygons_b;
 		Intersection::IntersectModels(model_a, model_b, polygons_a, polygons_b);
 		Intersection::DeletePolygons(model_a, model_b, polygons_a, polygons_b);
-		//Triangulate(polygons_a);
-		//Triangulate(polygons_b);		
-		//AddPolygonsToModel(model_a, polygons_a);
-		//AddPolygonsToModel(model_b, polygons_b);		
+		vector<Triangle> triangulation_a;
+		TrianglesBuilder::buildIntersectionArea(triangulation_a, polygons_a);
+		vector<Triangle> triangulation_b;
+		TrianglesBuilder::buildIntersectionArea(triangulation_b, polygons_b);
+		model_a.AddTriangles(triangulation_a);
+		model_b.AddTriangles(triangulation_b);
 		vector<PolyModel> polymodels = Intersection::DivideModels(model_a, model_b);
 		PolyModel result = Intersection::UnitePolymodels(polymodels[0], polymodels[3]);
 		return result;

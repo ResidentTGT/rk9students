@@ -118,6 +118,10 @@ namespace rk9
 		Triangles.push_back(t);
 	}
 
+	void PolyModel::AddTriangles(std::vector<Triangle> &trs) {
+		Triangles.insert(Triangles.end(), trs.begin(), trs.end());
+	}
+
 	void PolyModel::AddTriangle(Triangle t)
 	{
 		Triangles.emplace_back(t);

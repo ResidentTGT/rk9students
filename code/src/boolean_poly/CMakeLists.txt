@@ -26,11 +26,15 @@ set(sources
 	Operation.cpp
 	Polygon.cpp
     main.cpp
+	Edge.cpp
+	TrianglesBuilder.cpp
 )
 set(headers
     Intersection.h
 	Operation.h
 	Polygon.h
+	Edge.h
+	TrianglesBuilder.h
 )
 
 

@@ -4,7 +4,7 @@
 #include "common/Point.h" 
 #include "common/Triangle.h" 
 #include "Polygon.h"
-#include "common\Vector3.h"
+#include "common/Vector3.h"
 #include <algorithm>
 #include "Operation.h"
 using namespace std;
@@ -14,8 +14,8 @@ int main(int argc, char ** argv) {
 	int key = 1;
 	PolyModel model_a, model_b;
 
-	model_a.ReadFromSTLFile(argv[1]);
-	model_b.ReadFromSTLFile(argv[2]);
+	model_a.ReadFromSTLFile("A:/dev/rk9students/doc/Romanov/TestingModels/31(cube).stl");
+	model_b.ReadFromSTLFile("A:/dev/rk9students/doc/Romanov/TestingModels/32(cube).stl");
 
 	PolyModel result;
 	
