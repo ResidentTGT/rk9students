@@ -2,7 +2,7 @@
 
 namespace rk9 {
 	// Определение положения точки относительно отрезка
-	double Point::Tol = 0.00001;
+	double Point::Tol = 0.0000000001;
 	int Point::classify(Point& p0, Point& p1)
 	{
 		Point p2 = *this;
@@ -24,6 +24,4 @@ namespace rk9 {
 			return DESTINATION;
 		return BETWEEN;
 	}
-
-
 }

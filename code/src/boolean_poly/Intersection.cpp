@@ -32,15 +32,15 @@ namespace rk9
 				}
 			}
 		}
+
 		UnitePolygons(polygons_a, model_a);
 		UnitePolygons(polygons_b, model_b);
 	}
 
 	/*bool CompareWithEps(Point p1, Point p2)
 	{
-		double Eps = 0.000001;
+		double Eps = 0.00001;
 		return(abs(p1.X - p2.X) < Eps && abs(p1.Y - p2.Y) < Eps && abs(p1.Z - p2.Z) < Eps);
-
 	}*/
 
 	//finding the intersection between the edge of one triangle and plane of another
@@ -60,13 +60,11 @@ namespace rk9
 			intersect_points.push_back(intersect_point);
 		if (IntersectEdgeTriangle(tr2.B, tr2.C, tr1, tr2, intersect_point))
 			intersect_points.push_back(intersect_point);
-
 		return intersect_points;
 	}
 
 	//Находит пересечение ребра с треугольником 
 	bool Intersection::IntersectEdgeTriangle(Point point1, Point point2, Triangle tr1, Triangle tr2, Point& intersect_point) {
-
 		Plane plane = tr1.GetPlane();
 		if (plane.GetIntersectionWithLine(point1, point2, intersect_point))
 		{
@@ -111,7 +109,7 @@ namespace rk9
 			Vector3 normal = Vector3::CrossProduct(v1, v2);
 			Point p1((tr1.A.X + tr1.B.X + tr1.C.X) / 3, (tr1.A.Y + tr1.B.Y + tr1.C.Y) / 3, (tr1.A.Z + tr1.B.Z + tr1.C.Z) / 3);
 			Point p2(p1.X + normal.A, p1.Y + normal.B, p1.Z + normal.C);
-
+			vector<Point> pps;
 			for (int j = 0; j < triangles_number_b; j++)
 			{
 				Point intersect_point;
@@ -120,9 +118,25 @@ namespace rk9
 				if (plane.GetIntersectionWithLine(p1, p2, intersect_point) &&
 					Vector3::DotProduct(Vector3(intersect_point, p1), Vector3(p2, p1)) > 0 &&
 					tr2.IsPointInsideTriangle(intersect_point))
-					key++;
+				{
+					pps.push_back(intersect_point);
+				}
 			}
-			if (key % 2 != 0)
+
+			for (int j = 0; j < pps.size(); j++)
+			{
+				for (int k = j + 1; k < pps.size(); k++)
+				{
+					if (pps[j] == pps[k])
+					{
+						pps.erase(pps.begin() + k);
+						k--;
+					}
+				}
+			}
+
+
+			if (pps.size() % 2 != 0)
 			{
 				differ1.AddTriangle(tr1);
 				index_c.push_back(i);
@@ -143,7 +157,7 @@ namespace rk9
 			Vector3 normal = Vector3::CrossProduct(v1, v2);
 			Point p1((tr1.A.X + tr1.B.X + tr1.C.X) / 3, (tr1.A.Y + tr1.B.Y + tr1.C.Y) / 3, (tr1.A.Z + tr1.B.Z + tr1.C.Z) / 3);
 			Point p2(p1.X + normal.A, p1.Y + normal.B, p1.Z + normal.C);
-
+			vector<Point> pps;
 			for (int j = 0; j < triangles_number_a; j++)
 			{
 				Point intersect_point;
@@ -152,9 +166,26 @@ namespace rk9
 				if (plane.GetIntersectionWithLine(p1, p2, intersect_point) &&
 					Vector3::DotProduct(Vector3(intersect_point, p1), Vector3(p2, p1)) > 0 &&
 					tr2.IsPointInsideTriangle(intersect_point))
-					key++;
+				{
+					pps.push_back(intersect_point);
+				}
 			}
-			if (key % 2 != 0)
+
+			for (int j = 0; j < pps.size(); j++)
+			{
+				for (int k = j + 1; k < pps.size(); k++)
+				{
+					if (pps[j] == pps[k])
+					{
+						pps.erase(pps.begin() + k);
+						k--;
+					}
+				}
+			}
+
+
+
+			if (pps.size() % 2 != 0)
 			{
 				differ2.AddTriangle(tr1);
 				index_d.push_back(i);
@@ -165,118 +196,93 @@ namespace rk9
 		for (int i = index_d.size() - 1; i > -1; i--)
 			model_d.DeleteTriangle(index_d[i]);
 
-	polymodels.push_back(model_c);
-	polymodels.push_back(model_d);
-	polymodels.push_back(differ1);
-	polymodels.push_back(differ2);
-	return polymodels;
-}
-
-void Intersection::DeletePolygons(PolyModel& model_a, PolyModel& model_b, vector<Polygon>&polygons_a, vector<Polygon>&polygons_b)
-{
-	vector<int> tr_indexes_model_a;
-	for (int i = 0; i < polygons_a.size(); i++)
-		tr_indexes_model_a.push_back(polygons_a[i].triangle_index);
-	vector<int> tr_indexes_model_b;
-	for (int i = 0; i < polygons_b.size(); i++)
-		tr_indexes_model_b.push_back(polygons_b[i].triangle_index);
-
-	sort(tr_indexes_model_a.begin(), tr_indexes_model_a.end());
-	sort(tr_indexes_model_b.begin(), tr_indexes_model_b.end());
-
-	for (int i = tr_indexes_model_a.size() - 1; i > -1; i--)
-		model_a.DeleteTriangle(tr_indexes_model_a[i]);
-
-	for (int i = tr_indexes_model_b.size() - 1; i > -1; i--)
-		model_b.DeleteTriangle(tr_indexes_model_b[i]);
-}
-
-void Intersection::AddPolygonsToModel(PolyModel&model_a, vector<Polygon>&polygons_a)
-{
-	for (int i = 0; i < polygons_a.size(); i++)
-	{
-		Triangle tr = model_a.GetTriangleVertices(polygons_a[i].triangle_index);
+		polymodels.push_back(model_c);
+		polymodels.push_back(model_d);
+		polymodels.push_back(differ1);
+		polymodels.push_back(differ2);
+		return polymodels;
 	}
-}
 
-
-void Intersection::UnitePolygons(vector<Polygon>&polygons, PolyModel& model)
-{
-	for (int i = 0; i < polygons.size(); i++)
+	void Intersection::DeletePolygons(PolyModel& model_a, PolyModel& model_b, vector<Polygon>&polygons_a, vector<Polygon>&polygons_b)
 	{
-		for (int j = i + 1; j < polygons.size(); j++)
+		vector<int> tr_indexes_model_a;
+		for (int i = 0; i < polygons_a.size(); i++)
+			tr_indexes_model_a.push_back(polygons_a[i].triangle_index);
+		vector<int> tr_indexes_model_b;
+		for (int i = 0; i < polygons_b.size(); i++)
+			tr_indexes_model_b.push_back(polygons_b[i].triangle_index);
+
+		sort(tr_indexes_model_a.begin(), tr_indexes_model_a.end());
+		sort(tr_indexes_model_b.begin(), tr_indexes_model_b.end());
+
+		for (int i = tr_indexes_model_a.size() - 1; i > -1; i--)
+			model_a.DeleteTriangle(tr_indexes_model_a[i]);
+
+		for (int i = tr_indexes_model_b.size() - 1; i > -1; i--)
+			model_b.DeleteTriangle(tr_indexes_model_b[i]);
+	}
+
+	void Intersection::AddPolygonsToModel(PolyModel&model_a, vector<Polygon>&polygons_a)
+	{
+		for (int i = 0; i < polygons_a.size(); i++)
+			Triangle tr = model_a.GetTriangleVertices(polygons_a[i].triangle_index);
+	}
+
+	//Объединяет полигоны с одинаковым индексом треугольника, добавляет в полигоны точки треугольников,
+	//удаляет из полигонов одинаковые точки
+	void Intersection::UnitePolygons(vector<Polygon>&polygons, PolyModel& model)
+	{
+		for (int i = 0; i < polygons.size(); i++)
 		{
-			if (polygons[i].triangle_index == polygons[j].triangle_index)
+			for (int j = i + 1; j < polygons.size(); j++)
 			{
-				for (int k = 0; k < polygons[j].points.size(); k++)
-					polygons[i].points.push_back(polygons[j].points[k]);
-				polygons.erase(polygons.begin() + j);
-				j--;
+				if (polygons[i].triangle_index == polygons[j].triangle_index)
+				{
+					for (int k = 0; k < polygons[j].points.size(); k++)
+						polygons[i].points.push_back(polygons[j].points[k]);
+					polygons.erase(polygons.begin() + j);
+					j--;
+				}
 			}
 		}
-	}
 
-	for (int i = 0; i < polygons.size(); i++)
-	{
-		Triangle tr = model.GetTriangleVertices(polygons[i].triangle_index);
-		polygons[i].points.insert(polygons[i].points.begin(), tr.C);
-		polygons[i].points.insert(polygons[i].points.begin(), tr.B);
-		polygons[i].points.insert(polygons[i].points.begin(), tr.A);
-	}
-	for (int i = 0; i < polygons.size(); i++)
-	{
-		for (int j = 0; j < polygons[i].points.size(); j++)
+		for (int i = 0; i < polygons.size(); i++)
 		{
-			for (int k = j + 1; k < polygons[i].points.size(); k++)
+			Triangle tr = model.GetTriangleVertices(polygons[i].triangle_index);
+			polygons[i].points.insert(polygons[i].points.begin(), tr.C);
+			polygons[i].points.insert(polygons[i].points.begin(), tr.B);
+			polygons[i].points.insert(polygons[i].points.begin(), tr.A);
+		}
+		for (int i = 0; i < polygons.size(); i++)
+		{
+			for (int j = 0; j < polygons[i].points.size(); j++)
 			{
-				if (polygons[i].points[j] == polygons[i].points[k])
+				for (int k = j + 1; k < polygons[i].points.size(); k++)
 				{
-					polygons[i].points.erase(polygons[i].points.begin() + k);
-					k--;
+					if (polygons[i].points[j] == polygons[i].points[k])
+					{
+						polygons[i].points.erase(polygons[i].points.begin() + k);
+						k--;
+					}
 				}
 			}
 		}
 	}
-}
 
-PolyModel Intersection::UnitePolymodels(PolyModel& model_a, PolyModel& model_b)
-{
-	for (int i = 0; i < model_b.GetTrianglesCount(); i++)
-		model_a.AddTriangle(model_b.GetTriangleVertices(i));
-	return model_a;
-}
-
-void Intersection::WritePolygonsToModel(vector<Polygon>&polygons)
-{
-	PolyModel e;
-	for (int i = 0; i < polygons.size(); i++)
+	PolyModel Intersection::UnitePolymodels(PolyModel& model_a, PolyModel& model_b)
 	{
-	
-		if (polygons[i].points.size() % 3 == 0)
-		{
-			for (int k = 0; k < polygons[i].points.size() - 3; k += 3)
-			{
-				e.AddTriangle(polygons[i].points[k], polygons[i].points[k + 1], polygons[i].points[k + 2]);
-			}
-		}
-		if (polygons[i].points.size() % 2 == 0)
-		{
-			polygons[i].points.push_back(polygons[i].points[0]);
-			for (int k = 0; k < polygons[i].points.size() - 3; k += 3)
-			{
-				e.AddTriangle(polygons[i].points[k], polygons[i].points[k + 1], polygons[i].points[k + 2]);
-			}
-		}
-		if ((polygons[i].points.size() % 2 != 0) && (polygons[i].points.size() % 3 != 0))
-		{
-			polygons[i].points.push_back(polygons[i].points[0]);
-			polygons[i].points.push_back(polygons[i].points[1]);
-			for (int k = 0; k < polygons[i].points.size() - 3; k += 3)
-			{
-				e.AddTriangle(polygons[i].points[k], polygons[i].points[k + 1], polygons[i].points[k + 2]);
-			}
-		}
+		for (int i = 0; i < model_b.GetTrianglesCount(); i++)
+			model_a.AddTriangle(model_b.GetTriangleVertices(i));
+		return model_a;
 	}
-	e.WriteToSTLFile("A:/dev/rk9students/doc/Romanov/TestingModels/polygons8.stl");
-}
+	PolyModel Intersection::RotateModelNormal(PolyModel & model)
+	{
+		PolyModel pm;
+		for (int i = 0; i < model.GetTrianglesCount(); i++)
+		{
+			Triangle tr = model.GetTriangleVertices(i);
+			pm.AddTriangle(tr.B, tr.A, tr.C);
+		}
+		return pm;
+	}
 }

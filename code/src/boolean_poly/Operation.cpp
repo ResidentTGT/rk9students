@@ -3,6 +3,7 @@
 #include "Intersection.h"
 #include "TrianglesBuilder.h"
 using namespace std;
+
 namespace rk9
 {
 	
@@ -16,22 +17,18 @@ namespace rk9
 		Intersection::IntersectModels(model_a, model_b, polygons_a, polygons_b);
 		//Удаляет пересекающиеся треугольники из моделей
 		Intersection::DeletePolygons(model_a, model_b, polygons_a, polygons_b);					
-		//Триангуляция полигонов
-		//Intersection::WritePolygonsToModel(polygons_a);
+		//Триангуляция полигонов		
 		vector<Triangle> triangulation_a;
 		TrianglesBuilder::buildIntersectionArea(triangulation_a, polygons_a);
 		vector<Triangle> triangulation_b;
-		TrianglesBuilder::buildIntersectionArea(triangulation_b, polygons_b);
-
+		TrianglesBuilder::buildIntersectionArea(triangulation_b, polygons_b);	
 		//Добавление триангулированных треугольников в модели
 		model_a.AddTriangles(triangulation_a);
 		model_b.AddTriangles(triangulation_b);
-	
 		//Разбиение моделей на 4 части: 2 участка пересечения и 2 оставшиеся части моделей
 		vector<PolyModel> polymodels = Intersection::DivideModels(model_a, model_b);	
 		
 		PolyModel result = Intersection::UnitePolymodels(polymodels[0], polymodels[1]);
-		//PolyModel result = model_c;
 		return result;
 	}
 
@@ -63,6 +60,7 @@ namespace rk9
 		model_a.AddTriangles(triangulation_a);
 		model_b.AddTriangles(triangulation_b);
 		vector<PolyModel> polymodels = Intersection::DivideModels(model_a, model_b);
+		polymodels[3]=Intersection::RotateModelNormal(polymodels[3]);
 		PolyModel result = Intersection::UnitePolymodels(polymodels[0], polymodels[3]);
 		return result;
 	}	

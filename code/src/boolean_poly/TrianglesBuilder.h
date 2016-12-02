@@ -23,16 +23,15 @@ namespace rk9 {
 		vector<Point> swapXY(vector<Point> &s);
 		Point swapXY(Point &p);
 		void checkPoints(Point normal, double d, vector<Point> &s);
-		Point getNormal(vector<Point> &s, int &orientation);
+		Point getNormal(vector<Point> &s, double &orientation);
 		Point getNormal(vector<Point> &s);
 		int classifyNormal(Point n);
-		void modifyPoints(vector<Point> &s, int normal_type, int &orientation);
+		void modifyPoints(vector<Point> &s, int normal_type, double &orientation);
 		Point InvPointTransform(Point p, int normal_type);
 
 	public:
 		TrianglesBuilder();
 		//строим триангул€цию ƒелонэ инкрементным методом
-		void deleteCollinear(vector<Point> &s);
 		void buildTriangles(vector<Triangle> &triangles, std::vector<Point> s);
 		Edge hullEdge(vector<Point> &s, int n);
 		void updateFrontier(std::set<Edge> &frontier, Point &a, Point &b);

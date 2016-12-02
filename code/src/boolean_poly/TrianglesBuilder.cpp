@@ -72,7 +72,7 @@ namespace rk9 {
 	}
 
 
-	Point TrianglesBuilder::getNormal(vector<Point> &s, int &orientation) {
+	Point TrianglesBuilder::getNormal(vector<Point> &s, double &orientation) {
 		Point normal;
 		int n = s.size();
 		for (int i = 0; i < n-2; i++) {
@@ -92,7 +92,7 @@ namespace rk9 {
 
 	/*для упращения читаемости кода*/
 	Point TrianglesBuilder::getNormal(vector<Point> &s) {
-		int o;
+		double o;
 		return getNormal(s, o);
 	}
 
@@ -165,7 +165,7 @@ namespace rk9 {
 	void TrianglesBuilder::modifyPoints(
 		vector<Point> &s, 
 		int normal_type,
-		int &orientation
+		double &orientation
 	) {
 		//по умолчанию алгоритм работает со свободными координатами x y
 		//в некоторых случаях необходимо поменять координаты местами, чтобы свести задачу к уже решенной
@@ -302,7 +302,7 @@ namespace rk9 {
 		//ориентация тройки векторов должна быть правая
 		//интовая переменная orientation передается в функции по ссылке!
 		// ориентация полигона кот подали
-		int orientation;
+		double orientation;
 		normal_ = getNormal(s, orientation);
 		// получаем D плоскости
 		d_ = normal_.dotProduct3D(s[0]);

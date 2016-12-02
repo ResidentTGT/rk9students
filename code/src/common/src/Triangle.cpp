@@ -43,6 +43,6 @@ namespace rk9
 		double diff = t1.GetArea() + t2.GetArea() + t3.GetArea()
 					  - this->GetArea();
 
-		return diff < std::numeric_limits<double>::epsilon();
+		return diff <std::numeric_limits<float>::epsilon();
 	};
 }

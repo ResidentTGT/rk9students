@@ -11,11 +11,11 @@ using namespace std;
 using namespace rk9;
 
 int main(int argc, char ** argv) {
-	int key = 1;
+	int key = 3;
 	PolyModel model_a, model_b;
 
-	model_a.ReadFromSTLFile("A:/dev/rk9students/doc/Romanov/TestingModels/31(cube).stl");
-	model_b.ReadFromSTLFile("A:/dev/rk9students/doc/Romanov/TestingModels/32(cube).stl");
+	model_a.ReadFromSTLFile("A:/dev/rk9students/doc/Romanov/TestingModels/aston.stl");
+	model_b.ReadFromSTLFile("A:/dev/rk9students/doc/Romanov/TestingModels/ferrari.stl");
 
 	PolyModel result;
 	

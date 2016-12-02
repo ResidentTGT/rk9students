@@ -18,7 +18,6 @@ namespace rk9
 		static void AddPolygonsToModel(PolyModel & model_a, vector<Polygon>& polygons_a);
 		static void UnitePolygons(vector<Polygon>& polygons, PolyModel& model);
 		static PolyModel UnitePolymodels(PolyModel& model_a, PolyModel& model_b);
-
-		static void WritePolygonsToModel(vector<Polygon>&polygons);
+		static PolyModel RotateModelNormal(PolyModel &model);
 	};
 }

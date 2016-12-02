@@ -63,9 +63,6 @@ namespace rk9
 			return *this;
 		}
 
-		/*bool operator<(const rk9::Point& p) {
-		return ((X < p.X) || ((fabs(X - p.X) <= Tol) && (Y < p.Y)));
-		}*/
 
 		bool operator<(const rk9::Point& p) {
 			return (X < p.X) && (fabs(X - p.X) > Tol) ||
@@ -83,10 +80,6 @@ namespace rk9
 				(fabs(X - p.X) <= Tol) && (fabs(Y - p.Y) <= Tol) && (Z < p.Z) && (fabs(Z - p.Z) > Tol);
 		}
 
-		/*
-		bool operator<(Point& p) {
-		return ((X < p.X) || ((fabs(X - p.X) <= Tol) && (Y < p.Y)));
-		}*/
 
 		bool operator>(const rk9::Point& p) {
 			return (X > p.X) && (fabs(X - p.X) > Tol) ||
@@ -94,9 +87,6 @@ namespace rk9
 				(fabs(X - p.X) <= Tol) && (fabs(Y - p.Y) <= Tol) && (Z > p.Z) && (fabs(Z - p.Z) > Tol);
 		}
 
-		/*bool operator>(Point& p) {
-		return ((X > p.X) || ((fabs(X - p.X) <= Tol) && (Y > p.Y)));
-		}*/
 
 		Point Point::operator+ (Point& p) {
 			return Point(X + p.X, Y + p.Y, Z + p.Z);
@@ -163,7 +153,7 @@ namespace rk9
 			return Point(Y*p.Z - Z*p.Y, Z*p.X - X*p.Z, X*p.Y - Y*p.X);
 		}
 
-		int static Point::mixedProduct(Point& a, Point &b, Point& c) {
+		double static Point::mixedProduct(Point& a, Point &b, Point& c) {
 			return a.crossProduct(b).dotProduct3D(c);
 		}
 
