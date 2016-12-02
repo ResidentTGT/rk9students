@@ -14,8 +14,8 @@ int main(int argc, char ** argv) {
 	int key = 3;
 	PolyModel model_a, model_b;
 
-	model_a.ReadFromSTLFile("A:/dev/rk9students/doc/Romanov/TestingModels/aston.stl");
-	model_b.ReadFromSTLFile("A:/dev/rk9students/doc/Romanov/TestingModels/ferrari.stl");
+	model_a.ReadFromSTLFile("A:/dev/rk9students/doc/Romanov/TestingModels/11(ball).stl");
+	model_b.ReadFromSTLFile("A:/dev/rk9students/doc/Romanov/TestingModels/12(ball).stl");
 
 	PolyModel result;
 	
