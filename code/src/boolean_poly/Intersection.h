@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include <vector>
+//#include <vector>
 #include "Polygon.h"
 #include "common\PolyModel.h"
 namespace rk9
